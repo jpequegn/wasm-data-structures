@@ -5,6 +5,9 @@ use std::hash::{Hash, Hasher};
 pub mod bst;
 pub use bst::{BinarySearchTree, BSTMetrics};
 
+pub mod open_addressing;
+pub use open_addressing::{OpenAddressingHashTable, OpenAddressingMetrics};
+
 // Configuration
 const BUCKET_COUNT: usize = 256;
 
