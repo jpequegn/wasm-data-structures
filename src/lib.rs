@@ -2,6 +2,9 @@ use wasm_bindgen::prelude::*;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
+pub mod bst;
+pub use bst::{BinarySearchTree, BSTMetrics};
+
 // Configuration
 const BUCKET_COUNT: usize = 256;
 
