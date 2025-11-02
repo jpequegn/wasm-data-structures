@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Data Structure Benchmarks</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #121317;
+            color: #E0E6F0;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #1F4E8C; margin-bottom: 10px; }
+        p { color: #A3A9BF; margin-bottom: 20px; }
+        button {
+            padding: 10px 20px;
+            background: #1F4E8C;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        button:hover { background: #2762B3; }
+        table {
+            width: 100%;
+            background: #1E2130;
+            border-radius: 4px;
+            color: #E0E6F0;
+        }
+        #results {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            margin-top: 0;
+        }
+        #output {
+            background: #0a0c0f;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333A56;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Comprehensive Benchmarks</h1>
+        <p>Compare HashMap vs BST across dataset sizes and implementations</p>
+        <button onclick="runComprehensiveBenchmarks()">Run Full Benchmark Suite</button>
+
+        <div id="results"></div>
+        <div id="output"></div>
+    </div>
+
+    <script src="HashMap.js"></script>
+    <script src="BinarySearchTree.js"></script>
+    <script src="benchmark-wasm.js"></script>
+    <script src="benchmark-suite.js"></script>
+</body>
+</html>
