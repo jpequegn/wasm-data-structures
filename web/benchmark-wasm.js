@@ -168,6 +168,34 @@ async function benchmarkWasmBST() {
     log('Benchmark complete!<br>');
 }
 
+async function benchmarkWasmOpenAddressing(size) {
+    if (!wasmModule) {
+        log('WASM module not loaded');
+        return null;
+    }
+
+    const table = new wasmModule.OpenAddressingHashTable(1024);
+    const startTime = performance.now();
+
+    for (let i = 0; i < size; i++) {
+        table.insert(`key${i}`, i);
+    }
+
+    const insertTime = performance.now() - startTime;
+    const metrics = table.get_metrics();
+
+    // Convert Rust snake_case to JavaScript camelCase
+    return {
+        insertTime,
+        totalInsertions: metrics.total_insertions,
+        totalProbes: metrics.total_probes,
+        maxProbeLength: metrics.max_probe_length,
+        loadFactor: metrics.load_factor,
+        clusteringFactor: metrics.clustering_factor,
+        tombstoneCount: metrics.tombstone_count,
+    };
+}
+
 async function benchmarkBoth() {
     clearResults();
     benchmarkJSHashMap();
