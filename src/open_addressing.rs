@@ -213,3 +213,109 @@ impl OpenAddressingHashTable {
         self.metrics.clone()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_insert_and_get() {
+        let mut table = OpenAddressingHashTable::new(256);
+        table.insert("key1".to_string(), 100);
+        assert_eq!(table.get("key1"), Some(100));
+    }
+
+    #[test]
+    fn test_update_existing_key() {
+        let mut table = OpenAddressingHashTable::new(256);
+        table.insert("key1".to_string(), 100);
+        table.insert("key1".to_string(), 200);
+        assert_eq!(table.get("key1"), Some(200));
+    }
+
+    #[test]
+    fn test_delete_key() {
+        let mut table = OpenAddressingHashTable::new(256);
+        table.insert("key1".to_string(), 100);
+        assert_eq!(table.delete("key1"), Some(100));
+        assert_eq!(table.get("key1"), None);
+    }
+
+    #[test]
+    fn test_multiple_insertions() {
+        let mut table = OpenAddressingHashTable::new(256);
+        for i in 0..100 {
+            table.insert(format!("key{}", i), i);
+        }
+        assert_eq!(table.get("key50"), Some(50));
+        assert_eq!(table.get("key99"), Some(99));
+    }
+
+    #[test]
+    fn test_collision_handling() {
+        let mut table = OpenAddressingHashTable::new(16);
+        // Intentionally cause collisions with small table
+        table.insert("a".to_string(), 1);
+        table.insert("b".to_string(), 2);
+        table.insert("c".to_string(), 3);
+        assert_eq!(table.get("a"), Some(1));
+        assert_eq!(table.get("b"), Some(2));
+        assert_eq!(table.get("c"), Some(3));
+    }
+
+    #[test]
+    fn test_load_factor() {
+        let mut table = OpenAddressingHashTable::new(100);
+        for i in 0..50 {
+            table.insert(format!("key{}", i), i);
+        }
+        let metrics = table.get_metrics();
+        assert!((metrics.load_factor - 0.5).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_tombstone_handling() {
+        let mut table = OpenAddressingHashTable::new(256);
+        table.insert("key1".to_string(), 100);
+        table.insert("key2".to_string(), 200);
+        table.delete("key1");
+
+        // Can insert new key in tombstone slot
+        table.insert("key3".to_string(), 300);
+        assert_eq!(table.get("key2"), Some(200));
+        assert_eq!(table.get("key3"), Some(300));
+        assert_eq!(table.get("key1"), None);
+    }
+
+    #[test]
+    fn test_probe_count_tracking() {
+        let mut table = OpenAddressingHashTable::new(256);
+        table.insert("key1".to_string(), 100);
+        let metrics = table.get_metrics();
+        assert!(metrics.total_probes >= 0);
+        assert!(metrics.max_probe_length >= 0);
+    }
+
+    #[test]
+    fn test_get_nonexistent_key() {
+        let mut table = OpenAddressingHashTable::new(256);
+        assert_eq!(table.get("nonexistent"), None);
+    }
+
+    #[test]
+    fn test_delete_nonexistent_key() {
+        let mut table = OpenAddressingHashTable::new(256);
+        assert_eq!(table.delete("nonexistent"), None);
+    }
+
+    #[test]
+    fn test_clustering_factor_increases_with_collisions() {
+        let mut table = OpenAddressingHashTable::new(32);
+        // Insert enough items to cause clustering
+        for i in 0..16 {
+            table.insert(format!("key{}", i), i);
+        }
+        let metrics = table.get_metrics();
+        assert!(metrics.clustering_factor > 0.0);
+    }
+}
