@@ -1,7 +1,9 @@
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use wasm_bindgen::prelude::*;
 
 /// Hash table using open addressing with linear probing
+#[wasm_bindgen]
 pub struct OpenAddressingHashTable {
     table: Vec<Option<Entry>>,
     size: u32,
@@ -17,6 +19,7 @@ struct Entry {
 }
 
 /// Metrics collected during operations
+#[wasm_bindgen]
 #[derive(Clone)]
 pub struct OpenAddressingMetrics {
     pub total_insertions: u32,
@@ -27,9 +30,11 @@ pub struct OpenAddressingMetrics {
     pub tombstone_count: u32,
 }
 
+#[wasm_bindgen]
 impl OpenAddressingHashTable {
     /// Create new hash table with fixed capacity
-    pub fn new(capacity: u32) -> Self {
+    #[wasm_bindgen(constructor)]
+    pub fn new(capacity: u32) -> OpenAddressingHashTable {
         let mut table = Vec::with_capacity(capacity as usize);
         for _ in 0..capacity {
             table.push(None);
