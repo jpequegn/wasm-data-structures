@@ -73,9 +73,10 @@
         <p>Compare HashMap performance across implementations</p>
 
         <div class="controls">
-            <button onclick="benchmarkBoth()">Benchmark Both</button>
-            <button onclick="benchmarkJSHashMap()">Benchmark JS Only</button>
-            <button onclick="benchmarkWasmHashMap()">Benchmark WASM Only</button>
+            <button onclick="benchmarkAllStructures()">Benchmark All</button>
+            <button onclick="benchmarkBoth()">HashMap Only</button>
+            <button onclick="benchmarkJSHashMap()">JS HashMap</button>
+            <button onclick="benchmarkJSBST()">JS BST</button>
             <button onclick="clearResults()">Clear</button>
         </div>
 
@@ -84,6 +85,7 @@
     </div>
 
     <script src="HashMap.js"></script>
+    <script src="BinarySearchTree.js"></script>
     <script src="benchmark-wasm.js"></script>
     <script>
         const resultsDiv = document.getElementById('results');
