@@ -8,6 +8,9 @@ pub use bst::{BinarySearchTree, BSTMetrics};
 pub mod open_addressing;
 pub use open_addressing::{OpenAddressingHashTable, OpenAddressingMetrics};
 
+pub mod red_black_tree;
+pub use red_black_tree::{RedBlackTree, RBTreeMetrics, Color};
+
 // Configuration
 const BUCKET_COUNT: usize = 256;
 
