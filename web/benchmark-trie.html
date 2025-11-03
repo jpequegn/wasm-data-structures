@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trie Benchmark - String-Optimized Data Structure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121317;
+            color: #E0E6F0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #1F4E8C;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #A3A9BF;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .controls {
+            background-color: #1E2130;
+            padding: 20px;
+            border-radius: 2px;
+            margin-bottom: 30px;
+            border: 1px solid #333A56;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #A3A9BF;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 2px;
+            background-color: #1F4E8C;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2762B3;
+        }
+
+        button:disabled {
+            background-color: #555D7A;
+            cursor: not-allowed;
+        }
+
+        input[type="number"] {
+            padding: 8px 12px;
+            background-color: #1E2130;
+            color: #E0E6F0;
+            border: 1px solid #333A56;
+            border-radius: 2px;
+            font-size: 14px;
+            width: 150px;
+        }
+
+        input[type="text"] {
+            padding: 8px 12px;
+            background-color: #1E2130;
+            color: #E0E6F0;
+            border: 1px solid #333A56;
+            border-radius: 2px;
+            font-size: 14px;
+            width: 300px;
+        }
+
+        .benchmark-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .benchmark-box {
+            background-color: #1E2130;
+            padding: 20px;
+            border-radius: 2px;
+            border: 1px solid #333A56;
+        }
+
+        .benchmark-box h3 {
+            margin-bottom: 15px;
+            color: #1F4E8C;
+            font-size: 16px;
+        }
+
+        .metrics {
+            display: grid;
+            gap: 10px;
+        }
+
+        .metric-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 8px;
+            background-color: #2A2F45;
+            border-radius: 2px;
+        }
+
+        .metric-label {
+            color: #A3A9BF;
+            font-size: 13px;
+        }
+
+        .metric-value {
+            color: #FFC107;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            background-color: #1E2130;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            border: 1px solid #333A56;
+        }
+
+        .comparison-table thead {
+            background-color: #2A2F45;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333A56;
+            font-size: 13px;
+        }
+
+        .comparison-table th {
+            color: #1F4E8C;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:hover {
+            background-color: #2A2F45;
+        }
+
+        .status {
+            text-align: center;
+            color: #A3A9BF;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .error {
+            color: #DC3545;
+        }
+
+        .success {
+            color: #28A745;
+        }
+
+        .info-box {
+            background-color: #1E2130;
+            padding: 15px;
+            border-left: 3px solid #1F4E8C;
+            margin-bottom: 20px;
+            border-radius: 2px;
+            font-size: 13px;
+            color: #A3A9BF;
+        }
+
+        .info-box strong {
+            color: #E0E6F0;
+        }
+
+        .speedup {
+            color: #28A745;
+            font-weight: 600;
+        }
+
+        .speedup.slow {
+            color: #FFC107;
+        }
+
+        .autocomplete-results {
+            background-color: #1E2130;
+            padding: 15px;
+            border-radius: 2px;
+            border: 1px solid #333A56;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .autocomplete-results h4 {
+            color: #1F4E8C;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .autocomplete-results .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .autocomplete-results .word-item {
+            background-color: #2A2F45;
+            padding: 4px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+            color: #E0E6F0;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><2 Trie Benchmark</h1>
+        <p class="subtitle">Prefix tree optimized for string operations</p>
+
+        <div class="info-box">
+            <strong>Trie (Prefix Tree):</strong> A tree-based data structure where each node represents a character.
+            Words are formed by paths from root to nodes marked as end-of-word. Shared prefixes use shared nodes,
+            making it memory-efficient for large dictionaries. Perfect for autocomplete, spell-checking, and prefix matching.
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Dataset Type:</label>
+                <div class="button-group">
+                    <button onclick="selectDataset('random')">Random Dictionary</button>
+                    <button onclick="selectDataset('prefix-heavy')">Prefix-Heavy</button>
+                    <button onclick="selectDataset('long-words')">Long Words</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Word Count:</label>
+                <input type="number" id="wordCount" value="1000" min="100" max="5000" step="100">
+            </div>
+
+            <div class="control-group">
+                <label>Operations:</label>
+                <div class="button-group">
+                    <button onclick="runInsertBenchmark()">Insert Benchmark</button>
+                    <button onclick="runAutocompleteBenchmark()">Autocomplete Test</button>
+                    <button onclick="clearResults()">Clear Results</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Autocomplete Search:</label>
+                <div class="input-row">
+                    <input type="text" id="autocompletePrefix" placeholder="Enter prefix..." value="test">
+                    <button onclick="testAutocomplete()">Search</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <table class="comparison-table" id="resultsTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Implementation</th>
+                    <th>Insert Time (ms)</th>
+                    <th>Node Count</th>
+                    <th>Max Depth</th>
+                    <th>Memory Efficiency</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody">
+            </tbody>
+        </table>
+
+        <div class="benchmark-grid">
+            <div class="benchmark-box">
+                <h3>JavaScript Implementation</h3>
+                <div class="metrics" id="jsMetrics">
+                    <p style="color: #A3A9BF; font-size: 13px;">No results yet</p>
+                </div>
+            </div>
+
+            <div class="benchmark-box">
+                <h3>Rust/WASM Implementation</h3>
+                <div class="metrics" id="wasmMetrics">
+                    <p style="color: #A3A9BF; font-size: 13px;">No results yet</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="autocompleteResults" class="autocomplete-results" style="display: none;">
+            <h4>Autocomplete Results</h4>
+            <div class="word-list" id="wordList"></div>
+        </div>
+    </div>
+
+    <script src="Trie.js"></script>
+    <script type="module">
+        import init, { Trie as WasmTrie } from '../pkg/wasm_data_structures.js';
+
+        let wasmInitialized = false;
+        let currentDataset = 'random';
+        let currentWords = [];
+
+        // Initialize WASM
+        async function initWasm() {
+            if (!wasmInitialized) {
+                try {
+                    await init();
+                    wasmInitialized = true;
+                    console.log('WASM module initialized');
+                    return true;
+                } catch (error) {
+                    console.error('Failed to initialize WASM:', error);
+                    setStatus('Error: Could not load WASM module', true);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Dataset generators
+        function generateRandomDictionary(count) {
+            const words = [];
+            const syllables = ['al', 'an', 'ar', 'as', 'at', 'ed', 'en', 'er', 'es', 'he', 'in', 'is', 'it', 'le', 'me', 'nd', 'ng', 'nt', 'on', 'or', 're', 'se', 'st', 'te', 'th', 'ti', 'to', 've'];
+
+            for (let i = 0; i < count; i++) {
+                const wordLength = 3 + Math.floor(Math.random() * 5);
+                let word = '';
+                for (let j = 0; j < wordLength; j++) {
+                    word += syllables[Math.floor(Math.random() * syllables.length)];
+                }
+                words.push(word);
+            }
+            return words;
+        }
+
+        function generatePrefixHeavy(count) {
+            const words = [];
+            const prefixes = ['test', 'data', 'user', 'admin', 'system', 'config', 'process', 'service'];
+            const suffixes = ['ing', 'ed', 'er', 's', 'tion', 'able', 'ment', 'ness', 'ize', 'ful'];
+
+            for (let i = 0; i < count; i++) {
+                const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+                const num = Math.floor(Math.random() * 100);
+                words.push(prefix + suffix + num);
+            }
+            return words;
+        }
+
+        function generateLongWords(count) {
+            const words = [];
+            const chars = 'abcdefghijklmnopqrstuvwxyz';
+
+            for (let i = 0; i < count; i++) {
+                const wordLength = 15 + Math.floor(Math.random() * 15); // 15-30 chars
+                let word = '';
+                for (let j = 0; j < wordLength; j++) {
+                    word += chars[Math.floor(Math.random() * chars.length)];
+                }
+                words.push(word);
+            }
+            return words;
+        }
+
+        function getDataset(type, count) {
+            switch(type) {
+                case 'random':
+                    return generateRandomDictionary(count);
+                case 'prefix-heavy':
+                    return generatePrefixHeavy(count);
+                case 'long-words':
+                    return generateLongWords(count);
+                default:
+                    return generateRandomDictionary(count);
+            }
+        }
+
+        // Benchmark functions
+        async function benchmarkJS(words) {
+            const trie = new Trie();
+
+            const startTime = performance.now();
+            for (const word of words) {
+                trie.insert(word);
+            }
+            const insertTime = performance.now() - startTime;
+
+            const metrics = trie.getMetrics();
+
+            return {
+                insertTime,
+                nodeCount: metrics.nodeCount,
+                maxDepth: metrics.maxDepth,
+                wordCount: trie.len(),
+                trie
+            };
+        }
+
+        async function benchmarkWasm(words) {
+            const trie = new WasmTrie();
+
+            const startTime = performance.now();
+            for (const word of words) {
+                trie.insert(word);
+            }
+            const insertTime = performance.now() - startTime;
+
+            const metrics = trie.get_metrics();
+
+            return {
+                insertTime,
+                nodeCount: metrics.total_nodes,
+                maxDepth: metrics.max_depth,
+                wordCount: trie.len(),
+                trie
+            };
+        }
+
+        // UI functions
+        window.selectDataset = function(type) {
+            currentDataset = type;
+            setStatus(`Dataset type: ${type}`, false, false);
+        };
+
+        window.runInsertBenchmark = async function() {
+            const count = parseInt(document.getElementById('wordCount').value) || 1000;
+            setStatus(`Running insert benchmark with ${count} words (${currentDataset})...`);
+            clearMetrics();
+
+            const loaded = await initWasm();
+            if (!loaded) return;
+
+            currentWords = getDataset(currentDataset, count);
+
+            // Benchmark JS
+            const jsResult = await benchmarkJS(currentWords);
+
+            // Benchmark WASM
+            const wasmResult = await benchmarkWasm(currentWords);
+
+            // Display results
+            displayResults(jsResult, wasmResult);
+            setStatus(`Benchmark complete! (${count} words, ${currentDataset})`, false, true);
+        };
+
+        window.runAutocompleteBenchmark = async function() {
+            const count = parseInt(document.getElementById('wordCount').value) || 1000;
+            setStatus(`Running autocomplete benchmark with ${count} words...`);
+
+            const loaded = await initWasm();
+            if (!loaded) return;
+
+            currentWords = generatePrefixHeavy(count); // Use prefix-heavy for autocomplete test
+            const prefix = document.getElementById('autocompletePrefix').value || 'test';
+
+            // Benchmark JS
+            const jsTrie = new Trie();
+            for (const word of currentWords) {
+                jsTrie.insert(word);
+            }
+
+            const jsStart = performance.now();
+            const jsResults = jsTrie.autocomplete(prefix);
+            const jsTime = performance.now() - jsStart;
+
+            // Benchmark WASM
+            const wasmTrie = new WasmTrie();
+            for (const word of currentWords) {
+                wasmTrie.insert(word);
+            }
+
+            const wasmStart = performance.now();
+            const wasmResults = wasmTrie.autocomplete(prefix);
+            const wasmTime = performance.now() - wasmStart;
+
+            // Display autocomplete results
+            displayAutocompleteResults(prefix, jsResults, jsTime, wasmResults, wasmTime);
+            setStatus(`Autocomplete complete! Found ${jsResults.length} results for "${prefix}"`, false, true);
+        };
+
+        window.testAutocomplete = async function() {
+            const prefix = document.getElementById('autocompletePrefix').value;
+            if (!prefix) {
+                setStatus('Please enter a prefix', true);
+                return;
+            }
+
+            if (currentWords.length === 0) {
+                setStatus('Please run a benchmark first', true);
+                return;
+            }
+
+            const loaded = await initWasm();
+            if (!loaded) return;
+
+            // Build tries with current words
+            const jsTrie = new Trie();
+            const wasmTrie = new WasmTrie();
+
+            for (const word of currentWords) {
+                jsTrie.insert(word);
+                wasmTrie.insert(word);
+            }
+
+            const jsResults = jsTrie.autocomplete(prefix);
+            const wasmResults = wasmTrie.autocomplete(prefix);
+
+            displayAutocompleteResults(prefix, jsResults, 0, wasmResults, 0);
+            setStatus(`Found ${jsResults.length} results for "${prefix}"`, false, true);
+        };
+
+        function displayResults(jsResult, wasmResult) {
+            // Update individual boxes
+            const jsHtml = `
+                <div class="metric-row">
+                    <span class="metric-label">Insert Time</span>
+                    <span class="metric-value">${jsResult.insertTime.toFixed(2)}ms</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Node Count</span>
+                    <span class="metric-value">${jsResult.nodeCount}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Max Depth</span>
+                    <span class="metric-value">${jsResult.maxDepth}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Words Stored</span>
+                    <span class="metric-value">${jsResult.wordCount}</span>
+                </div>
+            `;
+
+            const wasmHtml = `
+                <div class="metric-row">
+                    <span class="metric-label">Insert Time</span>
+                    <span class="metric-value">${wasmResult.insertTime.toFixed(2)}ms</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Node Count</span>
+                    <span class="metric-value">${wasmResult.nodeCount}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Max Depth</span>
+                    <span class="metric-value">${wasmResult.maxDepth}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Words Stored</span>
+                    <span class="metric-value">${wasmResult.wordCount}</span>
+                </div>
+            `;
+
+            document.getElementById('jsMetrics').innerHTML = jsHtml;
+            document.getElementById('wasmMetrics').innerHTML = wasmHtml;
+
+            // Update comparison table
+            const speedup = (jsResult.insertTime / wasmResult.insertTime).toFixed(2);
+            const speedupClass = speedup > 1.5 ? 'speedup' : 'speedup slow';
+
+            // Calculate memory efficiency: words per node ratio
+            const jsEfficiency = (jsResult.wordCount / jsResult.nodeCount).toFixed(3);
+            const wasmEfficiency = (wasmResult.wordCount / wasmResult.nodeCount).toFixed(3);
+
+            const tableHtml = `
+                <tr>
+                    <td>JavaScript</td>
+                    <td>${jsResult.insertTime.toFixed(2)}ms</td>
+                    <td>${jsResult.nodeCount}</td>
+                    <td>${jsResult.maxDepth}</td>
+                    <td>${jsEfficiency} words/node</td>
+                </tr>
+                <tr>
+                    <td>Rust/WASM</td>
+                    <td>${wasmResult.insertTime.toFixed(2)}ms</td>
+                    <td>${wasmResult.nodeCount}</td>
+                    <td>${wasmResult.maxDepth}</td>
+                    <td>${wasmEfficiency} words/node</td>
+                </tr>
+                <tr style="background-color: #333A56;">
+                    <td><strong>Speedup (WASM)</strong></td>
+                    <td><span class="${speedupClass}">${speedup}x</span></td>
+                    <td colspan="3" style="text-align: center; color: #A3A9BF;">
+                        Node sharing efficiency: ${((jsResult.wordCount * 10) / jsResult.nodeCount).toFixed(1)}%
+                    </td>
+                </tr>
+            `;
+
+            document.getElementById('resultsBody').innerHTML = tableHtml;
+            document.getElementById('resultsTable').style.display = 'table';
+        }
+
+        function displayAutocompleteResults(prefix, jsResults, jsTime, wasmResults, wasmTime) {
+            const resultsDiv = document.getElementById('autocompleteResults');
+            const wordList = document.getElementById('wordList');
+
+            let html = '<div style="margin-bottom: 15px;">';
+            html += `<div style="color: #A3A9BF; font-size: 13px; margin-bottom: 10px;">`;
+            html += `Prefix: "<strong style="color: #E0E6F0;">${prefix}</strong>" | `;
+            html += `JS: ${jsResults.length} results${jsTime > 0 ? ` (${jsTime.toFixed(2)}ms)` : ''} | `;
+            html += `WASM: ${wasmResults.length} results${wasmTime > 0 ? ` (${wasmTime.toFixed(2)}ms)` : ''}`;
+            html += `</div></div>`;
+
+            // Show first 50 results
+            const displayResults = jsResults.slice(0, 50);
+            html += displayResults.map(word =>
+                `<span class="word-item">${word}</span>`
+            ).join('');
+
+            if (jsResults.length > 50) {
+                html += `<div style="color: #A3A9BF; font-size: 12px; margin-top: 10px;">... and ${jsResults.length - 50} more</div>`;
+            }
+
+            wordList.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        function clearMetrics() {
+            document.getElementById('jsMetrics').innerHTML = '<p style="color: #A3A9BF; font-size: 13px;">Running...</p>';
+            document.getElementById('wasmMetrics').innerHTML = '<p style="color: #A3A9BF; font-size: 13px;">Running...</p>';
+        }
+
+        window.clearResults = function() {
+            document.getElementById('jsMetrics').innerHTML = '<p style="color: #A3A9BF; font-size: 13px;">No results yet</p>';
+            document.getElementById('wasmMetrics').innerHTML = '<p style="color: #A3A9BF; font-size: 13px;">No results yet</p>';
+            document.getElementById('resultsTable').style.display = 'none';
+            document.getElementById('autocompleteResults').style.display = 'none';
+            currentWords = [];
+            setStatus('Results cleared');
+        };
+
+        function setStatus(message, isError = false, isSuccess = false) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = 'status';
+            if (isError) statusEl.classList.add('error');
+            if (isSuccess) statusEl.classList.add('success');
+        }
+
+        // Initialize on load
+        window.addEventListener('load', async () => {
+            await initWasm();
+            setStatus('Ready! Select a dataset and run a benchmark.');
+        });
+    </script>
+</body>
+</html>

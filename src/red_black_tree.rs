@@ -20,7 +20,7 @@ impl Node {
         Node {
             key,
             value,
-            color: Color::Red,  // New nodes are red
+            color: Color::Red, // New nodes are red
             left: None,
             right: None,
         }
@@ -105,7 +105,8 @@ impl RedBlackTree {
                 if key < n.key {
                     n.left = Self::insert_recursive(n.left.take(), key, value, rebalance_occurred);
                 } else if key > n.key {
-                    n.right = Self::insert_recursive(n.right.take(), key, value, rebalance_occurred);
+                    n.right =
+                        Self::insert_recursive(n.right.take(), key, value, rebalance_occurred);
                 } else {
                     n.value = value; // Update
                 }
@@ -128,8 +129,16 @@ impl RedBlackTree {
         if height_diff > 1 {
             if left_height > right_height {
                 // Left-heavy: check if left child is also left-heavy
-                let left_child_left = node.left.as_ref().and_then(|n| n.left.as_ref()).map_or(0, |_| 1);
-                let left_child_right = node.left.as_ref().and_then(|n| n.right.as_ref()).map_or(0, |_| 1);
+                let left_child_left = node
+                    .left
+                    .as_ref()
+                    .and_then(|n| n.left.as_ref())
+                    .map_or(0, |_| 1);
+                let left_child_right = node
+                    .left
+                    .as_ref()
+                    .and_then(|n| n.right.as_ref())
+                    .map_or(0, |_| 1);
 
                 if left_child_left > left_child_right {
                     // Left-left case: single right rotation
@@ -153,8 +162,16 @@ impl RedBlackTree {
                 }
             } else {
                 // Right-heavy: check if right child is also right-heavy
-                let right_child_left = node.right.as_ref().and_then(|n| n.left.as_ref()).map_or(0, |_| 1);
-                let right_child_right = node.right.as_ref().and_then(|n| n.right.as_ref()).map_or(0, |_| 1);
+                let right_child_left = node
+                    .right
+                    .as_ref()
+                    .and_then(|n| n.left.as_ref())
+                    .map_or(0, |_| 1);
+                let right_child_right = node
+                    .right
+                    .as_ref()
+                    .and_then(|n| n.right.as_ref())
+                    .map_or(0, |_| 1);
 
                 if right_child_right > right_child_left {
                     // Right-right case: single left rotation
@@ -358,7 +375,11 @@ mod tests {
         let metrics = tree.get_metrics();
         // Height should be logarithmic, not linear
         // For RB-Tree: height <= 2*log(50) ≈ 11
-        assert!(metrics.tree_height < 15, "Tree too tall for RB-Tree (height: {})", metrics.tree_height);
+        assert!(
+            metrics.tree_height < 15,
+            "Tree too tall for RB-Tree (height: {})",
+            metrics.tree_height
+        );
     }
 
     #[test]
@@ -416,7 +437,11 @@ mod tests {
         let metrics = tree.get_metrics();
         // RB-Tree height <= 2*log(n) where n=100
         // log2(100) ≈ 6.64, so max height should be ~13
-        assert!(metrics.tree_height <= 15, "Height not logarithmic (got {})", metrics.tree_height);
+        assert!(
+            metrics.tree_height <= 15,
+            "Height not logarithmic (got {})",
+            metrics.tree_height
+        );
     }
 
     #[test]

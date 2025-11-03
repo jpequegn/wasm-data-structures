@@ -314,6 +314,102 @@ function benchmarkJSSkipList(size) {
     };
 }
 
+/**
+ * Benchmark WASM Trie implementation
+ * Inserts words and tests autocomplete performance
+ *
+ * @param {Array<string>} words - Array of words to insert
+ * @returns {object} Benchmark results with insertion and autocomplete timing
+ */
+async function benchmarkWasmTrie(words) {
+    if (!wasmModule) {
+        log('WASM module not loaded');
+        return null;
+    }
+
+    const trie = new wasmModule.Trie();
+
+    // Benchmark insertions
+    const insertStart = performance.now();
+    for (let i = 0; i < words.length; i++) {
+        trie.insert(words[i], i);
+    }
+    const insertTime = performance.now() - insertStart;
+
+    const metrics = trie.get_metrics();
+
+    // Benchmark autocomplete with test prefixes
+    const testPrefixes = ['test', 'auto', 'app', 'the', 'con'];
+    const autocompleteStart = performance.now();
+    const autocompleteResults = [];
+
+    for (const prefix of testPrefixes) {
+        const results = trie.autocomplete(prefix);
+        autocompleteResults.push({
+            prefix,
+            count: results.length,
+            words: results.slice(0, 5) // First 5 results
+        });
+    }
+    const autocompleteTime = performance.now() - autocompleteStart;
+
+    // Convert Rust snake_case to JavaScript camelCase
+    return {
+        insertTime,
+        totalInsertions: metrics.total_insertions,
+        nodeCount: metrics.node_count,
+        maxDepth: metrics.max_depth,
+        averageWordLength: metrics.average_word_length,
+        autocompleteTime,
+        autocompleteResults,
+    };
+}
+
+/**
+ * Benchmark JavaScript Trie implementation
+ * Inserts words and tests autocomplete performance
+ *
+ * @param {Array<string>} words - Array of words to insert
+ * @returns {object} Benchmark results with insertion and autocomplete timing
+ */
+function benchmarkJSTrie(words) {
+    const trie = new Trie();
+
+    // Benchmark insertions
+    const insertStart = performance.now();
+    for (let i = 0; i < words.length; i++) {
+        trie.insert(words[i], i);
+    }
+    const insertTime = performance.now() - insertStart;
+
+    const metrics = trie.getMetrics();
+
+    // Benchmark autocomplete with test prefixes
+    const testPrefixes = ['test', 'auto', 'app', 'the', 'con'];
+    const autocompleteStart = performance.now();
+    const autocompleteResults = [];
+
+    for (const prefix of testPrefixes) {
+        const results = trie.autocomplete(prefix);
+        autocompleteResults.push({
+            prefix,
+            count: results.length,
+            words: results.slice(0, 5) // First 5 results
+        });
+    }
+    const autocompleteTime = performance.now() - autocompleteStart;
+
+    return {
+        insertTime,
+        totalInsertions: metrics.totalInsertions,
+        nodeCount: metrics.nodeCount,
+        maxDepth: metrics.maxDepth,
+        averageWordLength: metrics.averageWordLength,
+        autocompleteTime,
+        autocompleteResults,
+    };
+}
+
 async function benchmarkBoth() {
     clearResults();
     benchmarkJSHashMap();

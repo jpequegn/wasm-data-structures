@@ -1,0 +1,15 @@
+@@ -534,12 +534,12 @@
+         trie.insert("test");
+         trie.insert("testing");
+         trie.insert("tester");
+-        trie.insert("tester1");
++        trie.insert("testers");
+ 
+         let results = trie.autocomplete("teste");
+         assert_eq!(results.len(), 2);
+         assert!(results.contains(&"tester".to_string()));
+-        assert!(results.contains(&"tester1".to_string()));
++        assert!(results.contains(&"testers".to_string()));
+         assert!(!results.contains(&"test".to_string()));
+         assert!(!results.contains(&"testing".to_string()));
+     }

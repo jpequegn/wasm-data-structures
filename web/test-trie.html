@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trie Benchmark - JavaScript Implementation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007acc;
+            padding-bottom: 10px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .metric-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .metric-value {
+            color: #007acc;
+            font-family: monospace;
+        }
+        .autocomplete-result {
+            background: #f0f8ff;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #007acc;
+        }
+        .autocomplete-result code {
+            background: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        #output {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .impl-box {
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .js-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+        }
+        .wasm-box {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Trie (Prefix Tree) Benchmark</h1>
+
+    <div class="section">
+        <h2>Test Data</h2>
+        <p>Using 100+ common English words for testing autocomplete functionality.</p>
+        <button onclick="runBenchmark()">Run JavaScript Trie Benchmark</button>
+    </div>
+
+    <div class="section" id="results" style="display:none;">
+        <h2>Benchmark Results</h2>
+        <div id="metrics"></div>
+        <h3>Autocomplete Results</h3>
+        <div id="autocomplete"></div>
+    </div>
+
+    <div class="section">
+        <h2>Console Output</h2>
+        <div id="output"></div>
+    </div>
+
+    <script src="Trie.js"></script>
+    <script>
+        // Test data: 100+ common English words
+        const testWords = [
+            // Test prefix words
+            'test', 'testing', 'tester', 'tested', 'tests', 'testament', 'testify',
+            'auto', 'automatic', 'automobile', 'autopilot', 'autocomplete', 'automate',
+            'app', 'apple', 'application', 'apply', 'appear', 'appetite', 'applause',
+
+            // Common words
+            'the', 'they', 'their', 'them', 'these', 'there', 'then', 'theory',
+            'and', 'are', 'about', 'all', 'also', 'after', 'any', 'another',
+            'can', 'could', 'come', 'call', 'car', 'computer', 'console', 'continue',
+            'with', 'will', 'would', 'work', 'world', 'write', 'water', 'watch',
+            'have', 'has', 'had', 'here', 'help', 'house', 'happy', 'hello',
+            'for', 'from', 'first', 'find', 'food', 'fire', 'function', 'future',
+            'this', 'that', 'time', 'take', 'thing', 'think', 'through', 'together',
+            'not', 'new', 'now', 'need', 'next', 'never', 'name', 'number',
+            'you', 'your', 'year', 'yes', 'yesterday', 'young', 'yet',
+            'she', 'some', 'so', 'see', 'say', 'should', 'still', 'system',
+            'he', 'her', 'him', 'his', 'how', 'hand', 'head', 'home',
+            'it', 'is', 'in', 'if', 'into', 'important', 'information', 'include'
+        ];
+
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += message + '\n';
+        }
+
+        function runBenchmark() {
+            log('=== JavaScript Trie Benchmark ===\n');
+            log(`Inserting ${testWords.length} words...\n`);
+
+            const trie = new Trie();
+
+            // Measure insertion time
+            const insertStart = performance.now();
+            for (let i = 0; i < testWords.length; i++) {
+                trie.insert(testWords[i], i);
+            }
+            const insertTime = performance.now() - insertStart;
+
+            // Get metrics
+            const metrics = trie.getMetrics();
+
+            log(`Insert Time: ${insertTime.toFixed(2)}ms`);
+            log(`Total Insertions: ${metrics.totalInsertions}`);
+            log(`Node Count: ${metrics.nodeCount}`);
+            log(`Max Depth: ${metrics.maxDepth}`);
+            log(`Average Word Length: ${metrics.averageWordLength.toFixed(2)}\n`);
+
+            // Display metrics in UI
+            const metricsDiv = document.getElementById('metrics');
+            metricsDiv.innerHTML = `
+                <div class="metric-row">
+                    <span class="metric-label">Insert Time</span>
+                    <span class="metric-value">${insertTime.toFixed(2)}ms</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Total Insertions</span>
+                    <span class="metric-value">${metrics.totalInsertions}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Node Count</span>
+                    <span class="metric-value">${metrics.nodeCount}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Max Depth</span>
+                    <span class="metric-value">${metrics.maxDepth}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Average Word Length</span>
+                    <span class="metric-value">${metrics.averageWordLength.toFixed(2)}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Storage Efficiency</span>
+                    <span class="metric-value">${(metrics.nodeCount / trie.len()).toFixed(2)} nodes/word</span>
+                </div>
+            `;
+
+            // Test autocomplete with "test" prefix
+            log('Testing Autocomplete: prefix="test"');
+            const autocompleteStart = performance.now();
+            const testResults = trie.autocomplete('test');
+            const autocompleteTime = performance.now() - autocompleteStart;
+
+            log(`  Time: ${autocompleteTime.toFixed(2)}ms`);
+            log(`  Results: ${testResults.join(', ')}\n`);
+
+            // Test multiple prefixes
+            const testPrefixes = ['auto', 'app', 'the', 'con'];
+            let autocompleteHTML = `
+                <div class="autocomplete-result">
+                    <strong>Prefix: "test"</strong> (${autocompleteTime.toFixed(2)}ms)<br>
+                    Found ${testResults.length} words: <code>${testResults.join(', ')}</code>
+                </div>
+            `;
+
+            log('Additional Autocomplete Tests:');
+            for (const prefix of testPrefixes) {
+                const prefixStart = performance.now();
+                const results = trie.autocomplete(prefix);
+                const prefixTime = performance.now() - prefixStart;
+
+                log(`  "${prefix}": ${results.length} words in ${prefixTime.toFixed(2)}ms`);
+
+                autocompleteHTML += `
+                    <div class="autocomplete-result">
+                        <strong>Prefix: "${prefix}"</strong> (${prefixTime.toFixed(2)}ms)<br>
+                        Found ${results.length} words: <code>${results.slice(0, 10).join(', ')}${results.length > 10 ? '...' : ''}</code>
+                    </div>
+                `;
+            }
+
+            document.getElementById('autocomplete').innerHTML = autocompleteHTML;
+            document.getElementById('results').style.display = 'block';
+
+            log('\n=== Benchmark Complete ===');
+            log(`Total words: ${trie.len()}`);
+            log(`Total nodes: ${metrics.nodeCount}`);
+            log(`Compression ratio: ${(metrics.nodeCount / trie.len()).toFixed(2)}x`);
+        }
+    </script>
+</body>
+</html>

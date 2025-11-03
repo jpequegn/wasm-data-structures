@@ -1,5 +1,5 @@
-use wasm_bindgen::prelude::*;
 use std::cmp::Ordering;
+use wasm_bindgen::prelude::*;
 
 #[derive(Clone)]
 struct Node {
@@ -54,14 +54,16 @@ impl BinarySearchTree {
                 metrics.total_comparisons += 1;
                 match key.cmp(&n.key) {
                     Ordering::Less => {
-                        let is_new = Self::insert_recursive(&mut n.left, key, value, depth + 1, metrics);
+                        let is_new =
+                            Self::insert_recursive(&mut n.left, key, value, depth + 1, metrics);
                         if is_new {
                             metrics.max_depth = metrics.max_depth.max(depth + 1);
                         }
                         is_new
                     }
                     Ordering::Greater => {
-                        let is_new = Self::insert_recursive(&mut n.right, key, value, depth + 1, metrics);
+                        let is_new =
+                            Self::insert_recursive(&mut n.right, key, value, depth + 1, metrics);
                         if is_new {
                             metrics.max_depth = metrics.max_depth.max(depth + 1);
                         }
@@ -94,11 +96,7 @@ impl BinarySearchTree {
         }
     }
 
-    fn delete_recursive(
-        node: &mut Option<Box<Node>>,
-        key: &str,
-        metrics: &mut BSTMetrics,
-    ) -> bool {
+    fn delete_recursive(node: &mut Option<Box<Node>>, key: &str, metrics: &mut BSTMetrics) -> bool {
         match node {
             None => false,
             Some(n) => {
@@ -167,7 +165,8 @@ impl BinarySearchTree {
         if Self::insert_recursive(&mut self.root, key, value, 0, &mut self.metrics) {
             self.size += 1;
             self.metrics.total_insertions += 1;
-            self.metrics.average_depth = (self.metrics.total_comparisons as f32) / (self.size as f32);
+            self.metrics.average_depth =
+                (self.metrics.total_comparisons as f32) / (self.size as f32);
         }
     }
 

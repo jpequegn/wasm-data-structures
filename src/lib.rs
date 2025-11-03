@@ -1,18 +1,21 @@
-use wasm_bindgen::prelude::*;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use wasm_bindgen::prelude::*;
 
 pub mod bst;
-pub use bst::{BinarySearchTree, BSTMetrics};
+pub use bst::{BSTMetrics, BinarySearchTree};
 
 pub mod open_addressing;
 pub use open_addressing::{OpenAddressingHashTable, OpenAddressingMetrics};
 
 pub mod red_black_tree;
-pub use red_black_tree::{RedBlackTree, RBTreeMetrics, Color};
+pub use red_black_tree::{Color, RBTreeMetrics, RedBlackTree};
 
 pub mod skip_list;
 pub use skip_list::{SkipList, SkipListMetrics};
+
+pub mod trie;
+pub use trie::{Trie, TrieMetrics};
 
 // Configuration
 const BUCKET_COUNT: usize = 256;
@@ -87,7 +90,8 @@ impl HashMap {
         }
 
         // Recalculate max chain length
-        self.metrics.max_chain_length = self.buckets
+        self.metrics.max_chain_length = self
+            .buckets
             .iter()
             .map(|bucket| bucket.len() as u32)
             .max()
@@ -314,7 +318,10 @@ mod tests {
 
         let metrics = map.get_metrics();
         assert_eq!(metrics.total_insertions, 10000);
-        assert!(metrics.total_collisions > 0, "Should have collisions with 10k items in 256 buckets");
+        assert!(
+            metrics.total_collisions > 0,
+            "Should have collisions with 10k items in 256 buckets"
+        );
         assert!(metrics.max_chain_length > 1, "Max chain should be > 1");
         // Load factor ≈ 10000 / 256 ≈ 39
         assert!(metrics.average_load_factor > 38.0 && metrics.average_load_factor < 40.0);

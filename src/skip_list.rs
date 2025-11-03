@@ -1,7 +1,7 @@
-use wasm_bindgen::prelude::*;
 use rand::Rng;
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
+use wasm_bindgen::prelude::*;
 
 const MAX_LEVEL: usize = 16;
 const LEVEL_PROBABILITY: f32 = 0.5;
@@ -346,7 +346,11 @@ mod tests {
         let metrics = list.get_metrics();
         // Average level should be reasonable (< 10 for 100 items)
         // log2(100) ≈ 6.6, so average should be around that
-        assert!(metrics.average_level < 10.0, "Average level {} should be < 10", metrics.average_level);
+        assert!(
+            metrics.average_level < 10.0,
+            "Average level {} should be < 10",
+            metrics.average_level
+        );
     }
 
     #[test]
@@ -367,8 +371,13 @@ mod tests {
 
         // For 1000 items, expected comparisons ≈ log2(1000) ≈ 10
         // Allow generous margin (< 50 comparisons)
-        let comparisons_per_search = list.metrics.search_comparisons / list.metrics.total_searches.max(1);
-        assert!(comparisons_per_search < 50, "Comparisons {} should be logarithmic", comparisons_per_search);
+        let comparisons_per_search =
+            list.metrics.search_comparisons / list.metrics.total_searches.max(1);
+        assert!(
+            comparisons_per_search < 50,
+            "Comparisons {} should be logarithmic",
+            comparisons_per_search
+        );
     }
 
     #[test]
@@ -428,8 +437,11 @@ mod tests {
         // Expected average level with geometric distribution is around 1
         // (each node has 50% chance to be at level 0, 25% at level 1, etc.)
         // But actual average should be between 0.5 and 3.0 for random distribution
-        assert!(metrics.average_level >= 0.5 && metrics.average_level <= 3.0,
-                "Average level {} should be between 0.5-3.0", metrics.average_level);
+        assert!(
+            metrics.average_level >= 0.5 && metrics.average_level <= 3.0,
+            "Average level {} should be between 0.5-3.0",
+            metrics.average_level
+        );
     }
 
     // ========== NEW DELETE TESTS ==========
@@ -519,8 +531,12 @@ mod tests {
 
         // Verify remaining items (odd indices) are still searchable in order
         for i in (1..20).step_by(2) {
-            assert_eq!(list.search(&format!("key{:02}", i)), Some(i),
-                      "key{:02} should still exist", i);
+            assert_eq!(
+                list.search(&format!("key{:02}", i)),
+                Some(i),
+                "key{:02} should still exist",
+                i
+            );
         }
     }
 
@@ -573,7 +589,10 @@ mod tests {
         // Metrics should still be valid
         assert!(metrics_after.average_level > 0.0);
         assert!(metrics_after.max_level <= MAX_LEVEL as u32);
-        assert_eq!(metrics_after.total_insertions, metrics_before.total_insertions); // Insertions don't decrease
+        assert_eq!(
+            metrics_after.total_insertions,
+            metrics_before.total_insertions
+        ); // Insertions don't decrease
     }
 
     #[test]
@@ -622,11 +641,19 @@ mod tests {
         // Verify pattern: even indices gone, odd indices remain
         for i in 0..100 {
             if i % 2 == 0 {
-                assert_eq!(list.search(&format!("item{:03}", i)), None,
-                          "item{:03} should be deleted", i);
+                assert_eq!(
+                    list.search(&format!("item{:03}", i)),
+                    None,
+                    "item{:03} should be deleted",
+                    i
+                );
             } else {
-                assert_eq!(list.search(&format!("item{:03}", i)), Some(i),
-                          "item{:03} should exist", i);
+                assert_eq!(
+                    list.search(&format!("item{:03}", i)),
+                    Some(i),
+                    "item{:03} should exist",
+                    i
+                );
             }
         }
     }
