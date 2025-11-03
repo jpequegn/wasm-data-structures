@@ -11,6 +11,9 @@ pub use open_addressing::{OpenAddressingHashTable, OpenAddressingMetrics};
 pub mod red_black_tree;
 pub use red_black_tree::{RedBlackTree, RBTreeMetrics, Color};
 
+pub mod skip_list;
+pub use skip_list::{SkipList, SkipListMetrics};
+
 // Configuration
 const BUCKET_COUNT: usize = 256;
 
