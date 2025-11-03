@@ -196,6 +196,58 @@ async function benchmarkWasmOpenAddressing(size) {
     };
 }
 
+async function benchmarkWasmRedBlackTree(size) {
+    if (!wasmModule) {
+        log('WASM module not loaded');
+        return null;
+    }
+
+    const tree = new wasmModule.RedBlackTree();
+    const startTime = performance.now();
+
+    for (let i = 0; i < size; i++) {
+        tree.insert(`key${i}`, i);
+    }
+
+    const insertTime = performance.now() - startTime;
+    const metrics = tree.get_metrics();
+
+    // Convert Rust snake_case to JavaScript camelCase
+    return {
+        insertTime,
+        totalInsertions: metrics.total_insertions,
+        treeHeight: metrics.tree_height,
+        rebalanceCount: metrics.rebalance_count,
+        rotationCount: metrics.rotation_count,
+        colorFixCount: metrics.color_fix_count,
+        averageDepth: metrics.average_depth,
+        balanceRatio: metrics.balance_ratio,
+    };
+}
+
+function benchmarkJSRedBlackTree(size) {
+    const tree = new RedBlackTree();
+    const startTime = performance.now();
+
+    for (let i = 0; i < size; i++) {
+        tree.insert(`key${i}`, i);
+    }
+
+    const insertTime = performance.now() - startTime;
+    const metrics = tree.getMetrics();
+
+    return {
+        insertTime,
+        totalInsertions: metrics.totalInsertions,
+        treeHeight: metrics.treeHeight,
+        rebalanceCount: metrics.rebalanceCount,
+        rotationCount: metrics.rotationCount,
+        colorFixCount: metrics.colorFixCount,
+        averageDepth: metrics.averageDepth,
+        balanceRatio: metrics.balanceRatio,
+    };
+}
+
 async function benchmarkBoth() {
     clearResults();
     benchmarkJSHashMap();
