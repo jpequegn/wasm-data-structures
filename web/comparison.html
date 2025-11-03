@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structures Comparison - WASM Benchmarks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #121317;
+            color: #E0E6F0;
+            font-family: 'Inter', 'Roboto', sans-serif;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #1F4E8C;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #A3A9BF;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .data-structure {
+            background-color: #1E2130;
+            border: 1px solid #333A56;
+            border-radius: 4px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .data-structure:hover {
+            border-color: #1F4E8C;
+            box-shadow: 0 4px 12px rgba(31, 78, 140, 0.3);
+        }
+
+        .data-structure h2 {
+            font-size: 1.5rem;
+            color: #1F4E8C;
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-badge {
+            display: inline-block;
+            background-color: #2A2F45;
+            color: #A3A9BF;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .metrics {
+            margin: 1.5rem 0;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #333A56;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #A3A9BF;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            color: #E0E6F0;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        .operation-table {
+            width: 100%;
+            margin-top: 1rem;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .operation-table th,
+        .operation-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #333A56;
+        }
+
+        .operation-table th {
+            background-color: #2A2F45;
+            color: #1F4E8C;
+            font-weight: 600;
+        }
+
+        .operation-table td {
+            color: #A3A9BF;
+        }
+
+        .complexity-excellent {
+            color: #28A745;
+            font-weight: 600;
+        }
+
+        .complexity-good {
+            color: #FFC107;
+            font-weight: 600;
+        }
+
+        .complexity-fair {
+            color: #DC3545;
+            font-weight: 600;
+        }
+
+        .comparison-table {
+            background-color: #1E2130;
+            border: 1px solid #333A56;
+            border-radius: 4px;
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+            overflow-x: auto;
+        }
+
+        .comparison-table h3 {
+            color: #1F4E8C;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #333A56;
+        }
+
+        table th {
+            background-color: #2A2F45;
+            color: #1F4E8C;
+            font-weight: 600;
+        }
+
+        table td {
+            color: #A3A9BF;
+        }
+
+        table tr:hover {
+            background-color: #2A2F45;
+        }
+
+        .summary-section {
+            background-color: #1E2130;
+            border: 1px solid #333A56;
+            border-radius: 4px;
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .summary-section h3 {
+            color: #1F4E8C;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .use-case-list {
+            list-style: none;
+        }
+
+        .use-case-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .use-case-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #1F4E8C;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            background-color: #2A2F45;
+            color: #E0E6F0;
+            text-decoration: none;
+            border-radius: 2px;
+            border: 1px solid #333A56;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            background-color: #1F4E8C;
+            border-color: #1F4E8C;
+        }
+
+        .nav-link.active {
+            background-color: #1F4E8C;
+            border-color: #1F4E8C;
+        }
+
+        .footer {
+            text-align: center;
+            color: #A3A9BF;
+            padding-top: 2rem;
+            border-top: 1px solid #333A56;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .operation-table {
+                font-size: 0.8rem;
+            }
+
+            .operation-table th,
+            .operation-table td {
+                padding: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗂️ Data Structures Comparison</h1>
+        <p class="subtitle">Comprehensive WASM-based benchmarks of 5 fundamental data structures</p>
+
+        <div class="navigation">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="benchmark-hashmap.html" class="nav-link">HashMap</a>
+            <a href="benchmark-open-addressing.html" class="nav-link">Open Addressing</a>
+            <a href="benchmark-rbtree.html" class="nav-link">Red-Black Tree</a>
+            <a href="benchmark-skip-list.html" class="nav-link">Skip List</a>
+            <a href="benchmark-trie.html" class="nav-link">Trie</a>
+        </div>
+
+        <h2 style="color: #1F4E8C; margin: 2rem 0 1rem 0; font-size: 1.8rem;">Structure Overview</h2>
+
+        <div class="comparison-grid">
+            <!-- HashMap -->
+            <div class="data-structure">
+                <h2>HashMap</h2>
+                <div class="phase-badge">Phase 1</div>
+                <p style="margin-bottom: 1rem; color: #A3A9BF;">Hash table with separate chaining collision resolution</p>
+                <div class="metrics">
+                    <div class="metric-row">
+                        <span class="metric-label">Collision Strategy</span>
+                        <span class="metric-value">Chaining</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Load Factor</span>
+                        <span class="metric-value">0.75</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Buckets</span>
+                        <span class="metric-value">256</span>
+                    </div>
+                </div>
+                <table class="operation-table">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Insert</td>
+                            <td class="complexity-excellent">O(1)</td>
+                        </tr>
+                        <tr>
+                            <td>Search</td>
+                            <td class="complexity-excellent">O(1)</td>
+                        </tr>
+                        <tr>
+                            <td>Delete</td>
+                            <td class="complexity-excellent">O(1)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Open Addressing -->
+            <div class="data-structure">
+                <h2>Open Addressing</h2>
+                <div class="phase-badge">Phase 2</div>
+                <p style="margin-bottom: 1rem; color: #A3A9BF;">Hash table with linear probing collision resolution</p>
+                <div class="metrics">
+                    <div class="metric-row">
+                        <span class="metric-label">Collision Strategy</span>
+                        <span class="metric-value">Linear Probing</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Load Factor</span>
+                        <span class="metric-value">0.5</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Buckets</span>
+                        <span class="metric-value">512</span>
+                    </div>
+                </div>
+                <table class="operation-table">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Insert</td>
+                            <td class="complexity-excellent">O(1)</td>
+                        </tr>
+                        <tr>
+                            <td>Search</td>
+                            <td class="complexity-excellent">O(1)</td>
+                        </tr>
+                        <tr>
+                            <td>Delete</td>
+                            <td class="complexity-good">O(1)*</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Red-Black Tree -->
+            <div class="data-structure">
+                <h2>Red-Black Tree</h2>
+                <div class="phase-badge">Phase 3</div>
+                <p style="margin-bottom: 1rem; color: #A3A9BF;">Self-balancing binary search tree with color invariants</p>
+                <div class="metrics">
+                    <div class="metric-row">
+                        <span class="metric-label">Balance</span>
+                        <span class="metric-value">Color-based</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Max Height</span>
+                        <span class="metric-value">2×log(n)</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Ordered</span>
+                        <span class="metric-value">Yes</span>
+                    </div>
+                </div>
+                <table class="operation-table">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Insert</td>
+                            <td class="complexity-good">O(log n)</td>
+                        </tr>
+                        <tr>
+                            <td>Search</td>
+                            <td class="complexity-good">O(log n)</td>
+                        </tr>
+                        <tr>
+                            <td>Delete</td>
+                            <td class="complexity-good">O(log n)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Skip List -->
+            <div class="data-structure">
+                <h2>Skip List</h2>
+                <div class="phase-badge">Phase 4</div>
+                <p style="margin-bottom: 1rem; color: #A3A9BF;">Probabilistic multi-level linked list achieving O(log n)</p>
+                <div class="metrics">
+                    <div class="metric-row">
+                        <span class="metric-label">Balancing</span>
+                        <span class="metric-value">Probabilistic</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Probability</span>
+                        <span class="metric-value">p = 0.5</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Levels</span>
+                        <span class="metric-value">~log(n)</span>
+                    </div>
+                </div>
+                <table class="operation-table">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Insert</td>
+                            <td class="complexity-good">O(log n)</td>
+                        </tr>
+                        <tr>
+                            <td>Search</td>
+                            <td class="complexity-good">O(log n)</td>
+                        </tr>
+                        <tr>
+                            <td>Delete</td>
+                            <td class="complexity-good">O(log n)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Trie -->
+            <div class="data-structure">
+                <h2>Trie</h2>
+                <div class="phase-badge">Phase 5</div>
+                <p style="margin-bottom: 1rem; color: #A3A9BF;">Prefix tree optimized for string operations and autocomplete</p>
+                <div class="metrics">
+                    <div class="metric-row">
+                        <span class="metric-label">Specialization</span>
+                        <span class="metric-value">String-only</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Prefix Sharing</span>
+                        <span class="metric-value">Yes (65% efficient)</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Autocomplete</span>
+                        <span class="metric-value">Native support</span>
+                    </div>
+                </div>
+                <table class="operation-table">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Insert</td>
+                            <td class="complexity-excellent">O(m)</td>
+                        </tr>
+                        <tr>
+                            <td>Search</td>
+                            <td class="complexity-excellent">O(m)</td>
+                        </tr>
+                        <tr>
+                            <td>Autocomplete</td>
+                            <td class="complexity-excellent">O(m+k)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Comprehensive Comparison Table -->
+        <div class="comparison-table">
+            <h3>Detailed Operation Comparison</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data Structure</th>
+                        <th>Insert</th>
+                        <th>Search</th>
+                        <th>Delete</th>
+                        <th>Space</th>
+                        <th>Key Feature</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>HashMap</strong></td>
+                        <td>O(1)</td>
+                        <td>O(1)</td>
+                        <td>O(1)</td>
+                        <td>O(n)</td>
+                        <td>Fast access, no order</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Open Addressing</strong></td>
+                        <td>O(1)</td>
+                        <td>O(1)</td>
+                        <td>O(1)*</td>
+                        <td>O(n)</td>
+                        <td>All data inline, simpler</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Red-Black Tree</strong></td>
+                        <td>O(log n)</td>
+                        <td>O(log n)</td>
+                        <td>O(log n)</td>
+                        <td>O(n)</td>
+                        <td>Ordered traversal</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Skip List</strong></td>
+                        <td>O(log n)*</td>
+                        <td>O(log n)*</td>
+                        <td>O(log n)*</td>
+                        <td>O(n)</td>
+                        <td>Simpler than balanced trees</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trie</strong></td>
+                        <td>O(m)</td>
+                        <td>O(m)</td>
+                        <td>O(m)</td>
+                        <td>O(k·m)</td>
+                        <td>Prefix operations & autocomplete</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="color: #A3A9BF; margin-top: 1rem; font-size: 0.9rem;">* = expected/average case (probabilistic for Skip List, with tombstones for Open Addressing)</p>
+        </div>
+
+        <!-- When to Use -->
+        <div class="comparison-table">
+            <h3>When to Use Each Structure</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Structure</th>
+                        <th>Best Use Cases</th>
+                        <th>Avoid When</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>HashMap</strong></td>
+                        <td>General-purpose lookup, caching, frequency counting</td>
+                        <td>Need ordered iteration, prefix queries, worst-case guarantees</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Open Addressing</strong></td>
+                        <td>Memory-constrained environments, cache locality matters</td>
+                        <td>Frequent deletions, need stable addressing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Red-Black Tree</strong></td>
+                        <td>Ordered sets/maps, range queries, database indices</td>
+                        <td>Simple fast lookup, strings, prefix operations</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Skip List</strong></td>
+                        <td>Ordered data, simpler than RB-trees, distributed systems</td>
+                        <td>Worst-case guarantees required, very small datasets</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trie</strong></td>
+                        <td>Autocomplete, spell-check, IP routing, DNS, dictionary</td>
+                        <td>Non-string keys, no prefix operations needed, space constrained</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-section">
+            <h3>Learning Journey Summary</h3>
+            <p style="margin-bottom: 1.5rem;">This project implements 5 fundamental data structures using WebAssembly and JavaScript, demonstrating the trade-offs between different approaches for different problems:</p>
+
+            <h4 style="color: #1F4E8C; margin: 1.5rem 0 0.75rem 0;">Key Insights</h4>
+            <ul class="use-case-list">
+                <li><strong>Hash Tables (Phases 1-2):</strong> Unbeatable for simple O(1) lookup, but lose ordering and prefix capabilities</li>
+                <li><strong>Balanced Trees (Phase 3):</strong> Maintain order and balance, enabling range queries and sorted traversal at O(log n)</li>
+                <li><strong>Probabilistic Structures (Phase 4):</strong> Skip Lists show that randomization can compete with deterministic balancing</li>
+                <li><strong>Specialized Structures (Phase 5):</strong> Tries demonstrate how exploiting problem structure (strings, prefixes) enables specialized operations</li>
+                <li><strong>WASM Integration:</strong> All structures benefit from Rust+WASM compilation for 2-10x performance vs pure JavaScript</li>
+            </ul>
+
+            <h4 style="color: #1F4E8C; margin: 1.5rem 0 0.75rem 0;">Design Principles Applied</h4>
+            <ul class="use-case-list">
+                <li>Choose the right tool for the problem (no universal best structure)</li>
+                <li>Profile before optimizing (metrics tracking in every structure)</li>
+                <li>Understand trade-offs (space vs time, simplicity vs guarantees)</li>
+                <li>Leverage language strengths (Rust safety, WASM performance, JS simplicity)</li>
+                <li>Document learning (blog posts explaining each algorithm)</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Phase 1-5 Complete | wasm-data-structures Project</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Built with Rust + WebAssembly + JavaScript | All implementations tested and benchmarked</p>
+        </div>
+    </div>
+</body>
+</html>
