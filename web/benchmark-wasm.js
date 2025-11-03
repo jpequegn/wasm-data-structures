@@ -248,6 +248,72 @@ function benchmarkJSRedBlackTree(size) {
     };
 }
 
+/**
+ * Benchmark WASM Skip List implementation
+ * Inserts keys 0 to size-1 and measures performance
+ *
+ * @param {number} size - Number of items to insert
+ * @returns {object} Benchmark results with insertion time and metrics
+ */
+async function benchmarkWasmSkipList(size) {
+    if (!wasmModule) {
+        log('WASM module not loaded');
+        return null;
+    }
+
+    const list = new wasmModule.SkipList();
+    const startTime = performance.now();
+
+    // Insert sequential keys
+    for (let i = 0; i < size; i++) {
+        list.insert(`key${i}`, i);
+    }
+
+    const insertTime = performance.now() - startTime;
+    const metrics = list.get_metrics();
+
+    // Convert Rust snake_case to JavaScript camelCase
+    return {
+        insertTime,
+        totalInsertions: metrics.total_insertions,
+        totalSearches: metrics.total_searches,
+        searchComparisons: metrics.search_comparisons,
+        averageLevel: metrics.average_level,
+        maxLevel: metrics.max_level,
+        insertionCost: metrics.insertion_cost,
+    };
+}
+
+/**
+ * Benchmark JavaScript Skip List implementation
+ * Inserts keys 0 to size-1 and measures performance
+ *
+ * @param {number} size - Number of items to insert
+ * @returns {object} Benchmark results with insertion time and metrics
+ */
+function benchmarkJSSkipList(size) {
+    const list = new SkipList();
+    const startTime = performance.now();
+
+    // Insert sequential keys
+    for (let i = 0; i < size; i++) {
+        list.insert(`key${i}`, i);
+    }
+
+    const insertTime = performance.now() - startTime;
+    const metrics = list.getMetrics();
+
+    return {
+        insertTime,
+        totalInsertions: metrics.totalInsertions,
+        totalSearches: metrics.totalSearches,
+        searchComparisons: metrics.searchComparisons,
+        averageLevel: metrics.averageLevel,
+        maxLevel: metrics.maxLevel,
+        insertionCost: metrics.insertionCost,
+    };
+}
+
 async function benchmarkBoth() {
     clearResults();
     benchmarkJSHashMap();

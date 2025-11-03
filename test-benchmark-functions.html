@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Skip List Benchmark Functions</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { color: #4fc3f7; }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+        .pass { color: #4caf50; }
+        .fail { color: #f44336; }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #4fc3f7;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #81d4fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Skip List Benchmark Functions Test</h1>
+    <div>
+        <button onclick="testJSBenchmark()">Test JS SkipList Benchmark</button>
+        <button onclick="testWasmBenchmark()">Test WASM SkipList Benchmark</button>
+        <button onclick="testBoth()">Test Both</button>
+    </div>
+    <div id="output"></div>
+
+    <script src="web/SkipList.js"></script>
+    <script src="web/benchmark-wasm.js"></script>
+    <script>
+        const output = document.getElementById('output');
+
+        function log(msg, className = '') {
+            const div = document.createElement('div');
+            div.className = `result ${className}`;
+            div.innerHTML = msg;
+            output.appendChild(div);
+        }
+
+        async function testJSBenchmark() {
+            output.innerHTML = '';
+            log('<h2>Testing JavaScript Skip List Benchmark</h2>');
+
+            try {
+                const sizes = [100, 1000, 5000];
+                for (const size of sizes) {
+                    log(`<h3>Testing with ${size} items...</h3>`);
+                    const result = benchmarkJSSkipList(size);
+
+                    if (result) {
+                        log(`<pre>
+JS Skip List (${size} items):
+  - Insert Time: ${result.insertTime.toFixed(2)}ms
+  - Total Insertions: ${result.totalInsertions}
+  - Average Level: ${result.averageLevel.toFixed(2)}
+  - Max Level: ${result.maxLevel}
+  - Search Comparisons: ${result.searchComparisons}
+</pre>`, 'pass');
+                    } else {
+                        log('Failed to get results', 'fail');
+                    }
+                }
+                log('✓ All JS benchmarks completed successfully', 'pass');
+            } catch (e) {
+                log(`✗ Error: ${e.message}`, 'fail');
+                console.error(e);
+            }
+        }
+
+        async function testWasmBenchmark() {
+            output.innerHTML = '';
+            log('<h2>Testing WASM Skip List Benchmark</h2>');
+
+            try {
+                // Load WASM module
+                log('Loading WASM module...');
+                const loaded = await initWasm();
+                if (!loaded) {
+                    log('✗ Failed to load WASM module', 'fail');
+                    return;
+                }
+                log('✓ WASM module loaded', 'pass');
+
+                const sizes = [100, 1000, 5000];
+                for (const size of sizes) {
+                    log(`<h3>Testing with ${size} items...</h3>`);
+                    const result = await benchmarkWasmSkipList(size);
+
+                    if (result) {
+                        log(`<pre>
+WASM Skip List (${size} items):
+  - Insert Time: ${result.insertTime.toFixed(2)}ms
+  - Total Insertions: ${result.totalInsertions}
+  - Average Level: ${result.averageLevel.toFixed(2)}
+  - Max Level: ${result.maxLevel}
+  - Search Comparisons: ${result.searchComparisons}
+</pre>`, 'pass');
+                    } else {
+                        log('Failed to get results', 'fail');
+                    }
+                }
+                log('✓ All WASM benchmarks completed successfully', 'pass');
+            } catch (e) {
+                log(`✗ Error: ${e.message}`, 'fail');
+                console.error(e);
+            }
+        }
+
+        async function testBoth() {
+            output.innerHTML = '';
+            log('<h2>Comparing JS vs WASM Skip List</h2>');
+
+            try {
+                // Load WASM
+                log('Loading WASM module...');
+                const loaded = await initWasm();
+                if (!loaded) {
+                    log('✗ Failed to load WASM module', 'fail');
+                    return;
+                }
+                log('✓ WASM module loaded', 'pass');
+
+                const sizes = [1000, 5000];
+                for (const size of sizes) {
+                    log(`<h3>Benchmarking ${size} items</h3>`);
+
+                    // JS
+                    const jsResult = benchmarkJSSkipList(size);
+                    // WASM
+                    const wasmResult = await benchmarkWasmSkipList(size);
+
+                    const speedup = (jsResult.insertTime / wasmResult.insertTime).toFixed(2);
+                    const faster = speedup > 1 ? 'WASM' : 'JS';
+
+                    log(`<pre>
+Comparison for ${size} items:
+
+JavaScript:
+  - Insert Time: ${jsResult.insertTime.toFixed(2)}ms
+  - Average Level: ${jsResult.averageLevel.toFixed(2)}
+  - Max Level: ${jsResult.maxLevel}
+
+WASM:
+  - Insert Time: ${wasmResult.insertTime.toFixed(2)}ms
+  - Average Level: ${wasmResult.averageLevel.toFixed(2)}
+  - Max Level: ${wasmResult.maxLevel}
+
+Result: ${faster} is ${Math.abs(speedup)}x faster
+</pre>`, 'pass');
+                }
+                log('✓ Comparison complete', 'pass');
+            } catch (e) {
+                log(`✗ Error: ${e.message}`, 'fail');
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>

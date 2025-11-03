@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skip List Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { color: #4fc3f7; }
+        .test {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+        .pass { color: #4caf50; }
+        .fail { color: #f44336; }
+        .info { color: #4fc3f7; }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Skip List Test Suite</h1>
+    <div id="output"></div>
+
+    <script src="SkipList.js"></script>
+    <script>
+        const output = document.getElementById('output');
+
+        function log(msg, className = '') {
+            const div = document.createElement('div');
+            div.className = `test ${className}`;
+            div.innerHTML = msg;
+            output.appendChild(div);
+        }
+
+        function assert(condition, message) {
+            if (condition) {
+                log(`✓ ${message}`, 'pass');
+                return true;
+            } else {
+                log(`✗ ${message}`, 'fail');
+                return false;
+            }
+        }
+
+        // Test 1: Basic insertion and search
+        log('<h2>Test 1: Basic Insertion and Search</h2>', 'info');
+        const list1 = new SkipList();
+        list1.insert('key1', 100);
+        assert(list1.search('key1') === 100, 'Should find inserted key');
+        assert(list1.search('key2') === undefined, 'Should not find non-existent key');
+        assert(list1.len() === 1, 'Size should be 1');
+
+        // Test 2: Multiple insertions
+        log('<h2>Test 2: Multiple Insertions</h2>', 'info');
+        const list2 = new SkipList();
+        for (let i = 0; i < 50; i++) {
+            list2.insert(`key${i}`, i);
+        }
+        assert(list2.len() === 50, 'Size should be 50');
+        for (let i = 0; i < 50; i++) {
+            assert(list2.search(`key${i}`) === i, `Should find key${i}`);
+        }
+
+        // Test 3: Update existing key
+        log('<h2>Test 3: Update Existing Key</h2>', 'info');
+        const list3 = new SkipList();
+        list3.insert('key1', 100);
+        list3.insert('key1', 200);
+        assert(list3.search('key1') === 200, 'Should have updated value');
+        assert(list3.len() === 1, 'Size should still be 1');
+
+        // Test 4: Deletion
+        log('<h2>Test 4: Deletion</h2>', 'info');
+        const list4 = new SkipList();
+        list4.insert('key1', 100);
+        list4.insert('key2', 200);
+        list4.insert('key3', 300);
+        assert(list4.delete('key2') === 200, 'Should return deleted value');
+        assert(list4.search('key2') === undefined, 'Should not find deleted key');
+        assert(list4.len() === 2, 'Size should be 2');
+        assert(list4.delete('nonexistent') === undefined, 'Should return undefined for non-existent key');
+
+        // Test 5: Large insertion and metrics
+        log('<h2>Test 5: Large Insertion and Metrics</h2>', 'info');
+        const list5 = new SkipList();
+        const startTime = performance.now();
+        for (let i = 0; i < 1000; i++) {
+            list5.insert(`key${i}`, i);
+        }
+        const insertTime = performance.now() - startTime;
+
+        assert(list5.len() === 1000, 'Size should be 1000');
+        const metrics = list5.getMetrics();
+
+        log(`<pre>
+Metrics for 1000 insertions:
+- Total Insertions: ${metrics.totalInsertions}
+- Average Level: ${metrics.averageLevel.toFixed(2)}
+- Max Level: ${metrics.maxLevel}
+- Total Searches: ${metrics.totalSearches}
+- Search Comparisons: ${metrics.searchComparisons}
+- Insert Time: ${insertTime.toFixed(2)}ms
+</pre>`, 'info');
+
+        // For 1000 items, expected average level is around log2(1000) ≈ 10
+        assert(metrics.averageLevel > 5.0 && metrics.averageLevel < 15.0,
+               `Average level should be reasonable (5-15), got ${metrics.averageLevel.toFixed(2)}`);
+        assert(metrics.maxLevel >= 0 && metrics.maxLevel <= 16,
+               `Max level should be 0-16, got ${metrics.maxLevel}`);
+
+        // Test 6: Verify sorted order
+        log('<h2>Test 6: Verify Sorted Order</h2>', 'info');
+        const list6 = new SkipList();
+        // Insert in random order
+        const keys = ['delta', 'alpha', 'charlie', 'bravo', 'echo'];
+        const values = [4, 1, 3, 2, 5];
+        for (let i = 0; i < keys.length; i++) {
+            list6.insert(keys[i], values[i]);
+        }
+        // Verify all can be found
+        assert(list6.search('alpha') === 1, 'Should find alpha');
+        assert(list6.search('bravo') === 2, 'Should find bravo');
+        assert(list6.search('charlie') === 3, 'Should find charlie');
+        assert(list6.search('delta') === 4, 'Should find delta');
+        assert(list6.search('echo') === 5, 'Should find echo');
+
+        // Test 7: Performance comparison
+        log('<h2>Test 7: Performance Test (5000 items)</h2>', 'info');
+        const list7 = new SkipList();
+        const perfStart = performance.now();
+        for (let i = 0; i < 5000; i++) {
+            list7.insert(`key${i}`, i);
+        }
+        const perfInsertTime = performance.now() - perfStart;
+
+        // Test search performance
+        const searchStart = performance.now();
+        for (let i = 0; i < 100; i++) {
+            list7.search(`key${Math.floor(Math.random() * 5000)}`);
+        }
+        const searchTime = performance.now() - searchStart;
+
+        const finalMetrics = list7.getMetrics();
+        log(`<pre>
+Performance for 5000 insertions:
+- Insert Time: ${perfInsertTime.toFixed(2)}ms (${(perfInsertTime / 5000).toFixed(3)}ms per item)
+- Search Time (100 random searches): ${searchTime.toFixed(2)}ms (${(searchTime / 100).toFixed(3)}ms per search)
+- Average Level: ${finalMetrics.averageLevel.toFixed(2)}
+- Max Level: ${finalMetrics.maxLevel}
+- Avg Search Comparisons: ${(finalMetrics.searchComparisons / finalMetrics.totalSearches).toFixed(2)}
+</pre>`, 'info');
+
+        assert(perfInsertTime < 5000, 'Should complete 5000 insertions in < 5 seconds');
+        assert(finalMetrics.averageLevel > 7.0 && finalMetrics.averageLevel < 18.0,
+               `Average level should be ~log2(5000) ≈ 12.3, got ${finalMetrics.averageLevel.toFixed(2)}`);
+
+        // Test 8: Empty list operations
+        log('<h2>Test 8: Empty List Operations</h2>', 'info');
+        const list8 = new SkipList();
+        assert(list8.isEmpty(), 'New list should be empty');
+        assert(list8.len() === 0, 'Size should be 0');
+        assert(list8.search('key1') === undefined, 'Search on empty list should return undefined');
+        assert(list8.delete('key1') === undefined, 'Delete on empty list should return undefined');
+
+        log('<h2>All Tests Complete!</h2>', 'pass');
+    </script>
+</body>
+</html>
